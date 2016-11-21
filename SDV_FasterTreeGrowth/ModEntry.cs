@@ -5,17 +5,20 @@ using StardewValley.TerrainFeatures;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 
 namespace SDV_KeyListener
 {
     public class ModEntry : Mod
     {
-        Random r = new Random();
-        int chance = 35;
+        int chance;
 
         // helper - contains i/o methods for working dir
         public override void Entry(ModHelper helper)
         {
+            ModConfig config = helper.ReadConfig<ModConfig>();
+            chance = config.chance;
+
             TimeEvents.OnNewDay += this.onNewDay;
         }
 
@@ -24,6 +27,14 @@ namespace SDV_KeyListener
         // e - Event data
         private void onNewDay(object sender, EventArgsNewDay e)
         {
+            if (!e.IsNewDay)
+            {
+                return;
+            }
+
+            Random r = new Random();
+            int[] count = Enumerable.Repeat(5, 0).ToArray();
+
             foreach (GameLocation location in Game1.locations)
             {
                 foreach (KeyValuePair<Vector2, StardewValley.TerrainFeatures.TerrainFeature> pair in location.terrainFeatures)
@@ -31,13 +42,25 @@ namespace SDV_KeyListener
                     if (pair.Value is Tree)
                     {
                         Tree tree = (Tree)pair.Value;
-                        if (tree.growthStage < 5 && tree.treeType != 6 && r.Next(1, 100) <= chance) tree.growthStage++;
+                        if (tree.growthStage < 5 && tree.treeType != 6 && r.Next(1, 100) <= chance)
+                        {
+                            tree.growthStage++;
+                            count[tree.growthStage]++;
+                        }
                     } else if (pair.Value is FruitTree)
                     {
                         FruitTree tree = (FruitTree)pair.Value;
-                        if (tree.growthStage < 5 && r.Next(1, 100) <= chance) tree.growthStage++;
+                        if (tree.growthStage < 5 && r.Next(1, 100) <= chance)
+                        {
+                            tree.growthStage++;
+                            count[tree.growthStage]++;
+                        }
                     }
                 }
+            }
+            for (int i = 1; i < count.Count()-1; i++)
+            {
+                Log.Info($"{count[i]} trees have grown to stage {i+1}...");
             }
         }
     }
