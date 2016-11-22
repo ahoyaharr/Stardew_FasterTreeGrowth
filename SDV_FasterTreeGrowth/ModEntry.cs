@@ -33,7 +33,7 @@ namespace SDV_KeyListener
             }
 
             Random r = new Random();
-            int[] count = Enumerable.Repeat(5, 0).ToArray();
+            int count = 0;
 
             foreach (GameLocation location in Game1.locations)
             {
@@ -44,24 +44,22 @@ namespace SDV_KeyListener
                         Tree tree = (Tree)pair.Value;
                         if (tree.growthStage < 5 && tree.treeType != 6 && r.Next(1, 100) <= chance)
                         {
+                            count++;
                             tree.growthStage++;
-                            count[tree.growthStage]++;
                         }
-                    } else if (pair.Value is FruitTree)
+                    }
+                    else if (pair.Value is FruitTree)
                     {
                         FruitTree tree = (FruitTree)pair.Value;
                         if (tree.growthStage < 5 && r.Next(1, 100) <= chance)
                         {
+                            count++;
                             tree.growthStage++;
-                            count[tree.growthStage]++;
                         }
                     }
                 }
             }
-            for (int i = 1; i < count.Count()-1; i++)
-            {
-                Log.Info($"{count[i]} trees have grown to stage {i+1}...");
-            }
+            Log.Info($"{count} trees have grown in the night...");
         }
     }
 }
